@@ -33,7 +33,7 @@
 
 //   The module connects to the specified WLAN as a WiFi-client. After
 //   that, it requests the current date an time via network time protocol
-//   from a specific NTP-server.
+//   from a specific NTP-server->
 //   Last step in starting up is to create a http-server listening to a
 //   specified port for requests.
 //   The web server handles a configuration page for up to eight channels.
@@ -721,7 +721,7 @@ void doTimeOnSelect( char *sTarget, char *sSwitch, char *sBgColor, int tmNum, ch
 //
 // ************************************************************************
 //
-ESP8266WebServer server; // DEFAULT_HTTP_LISTENPORT
+ESP8266WebServer *server; // DEFAULT_HTTP_LISTENPORT
 String pageContent;
 int serverStatusCode;
 //
@@ -1693,11 +1693,11 @@ void setup()
   }
 #endif // DO_LOG
 
-  server = ESP8266WebServer( (unsigned long) wwwServerPort.toInt() );
-  server.on("/", setupPage);
-  server.on("/api", apiPage);
+  server = new ESP8266WebServer( (unsigned long) wwwServerPort.toInt() );
+  server->on("/", setupPage);
+  server->on("/api", apiPage);
 
-  server.begin();
+  server->begin();
 
   localIP = WiFi.localIP();
   wwwServerIP = localIP.toString();
@@ -2577,7 +2577,7 @@ void loop()
   IPAddress requestFromIP;
   String dataString;
 
-  server.handleClient();
+  server->handleClient();
   delay(2);
   
   if( millis() - lastMulticastCheck >= MULTICAST_CHECK_INTERVAL_MS )
@@ -2620,7 +2620,7 @@ void loop()
   } // millis() - lastMulticastCheck >= MULTICAST_CHECK_INTERVAL_MS
   else
   {
-    server.handleClient();
+    server->handleClient();
     delay(2);
   }
   
@@ -2664,7 +2664,7 @@ void loop()
   }
   else
   {
-    server.handleClient();
+    server->handleClient();
     delay(2);
   }
 
@@ -2685,7 +2685,7 @@ void loop()
     }
   }
   
-  server.handleClient();
+  server->handleClient();
   delay(2);
   
 }
@@ -2929,18 +2929,18 @@ void setupPage()
   }
 #endif // DO_LOG
 
-  for (i = 0; i < server.args(); i++ )
+  for (i = 0; i < server->args(); i++ )
   {
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log(LOGLEVEL_DEBUG, (const char*) "%s = %s\n", server.argName(i).c_str(), server.arg(i).c_str() );
+      Logger.Log(LOGLEVEL_DEBUG, (const char*) "%s = %s\n", server->argName(i).c_str(), server->arg(i).c_str() );
     }
 #endif // DO_LOG
   }
 
-  if ( server.method() == SERVER_METHOD_POST )
-    //        server.hasArg(INDEX_BUTTONNAME_ADMIN)  )
+  if ( server->method() == SERVER_METHOD_POST )
+    //        server->hasArg(INDEX_BUTTONNAME_ADMIN)  )
   {
 #ifdef DO_LOG
     if ( !beQuiet )
@@ -2959,7 +2959,7 @@ void setupPage()
 #endif // DO_LOG
   }
 
-  if ( server.hasArg("submit") && server.arg("submit").equalsIgnoreCase("speichern") )
+  if ( server->hasArg("submit") && server->arg("submit").equalsIgnoreCase("speichern") )
 
   {
     // for( i = 0; i < MAX_ACTION_TABLE_LINES; i++ )
@@ -2982,143 +2982,143 @@ void setupPage()
       formFieldName[KW_IDX_MODE]       = String("mode")       + String(i+1);
 
 
-      tblEntry[i].name         = server.arg(formFieldName[KW_IDX_BEZEICHNER]);
+      tblEntry[i].name         = server->arg(formFieldName[KW_IDX_BEZEICHNER]);
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].name         = server.arg(\"%s\") ->%s\n", 
-                  i, formFieldName[KW_IDX_BEZEICHNER].c_str(), server.arg(formFieldName[KW_IDX_BEZEICHNER]).c_str());
+      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].name         = server->arg(\"%s\") ->%s\n", 
+                  i, formFieldName[KW_IDX_BEZEICHNER].c_str(), server->arg(formFieldName[KW_IDX_BEZEICHNER]).c_str());
     }
 #endif // DO_LOG
 
-      tblEntry[i].mode         = server.arg(formFieldName[KW_IDX_MODE]);
+      tblEntry[i].mode         = server->arg(formFieldName[KW_IDX_MODE]);
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].mode         = server.arg(\"%s\") ->%s\n", 
-                  i, formFieldName[KW_IDX_MODE].c_str(), server.arg(formFieldName[KW_IDX_MODE]).c_str());
+      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].mode         = server->arg(\"%s\") ->%s\n", 
+                  i, formFieldName[KW_IDX_MODE].c_str(), server->arg(formFieldName[KW_IDX_MODE]).c_str());
     }
 #endif // DO_LOG
 
-      if( isValidHour( server.arg(formFieldName[KW_IDX_HFROM_1]).c_str()) )
+      if( isValidHour( server->arg(formFieldName[KW_IDX_HFROM_1]).c_str()) )
       {
-          tblEntry[i].hourFrom_1   = server.arg(formFieldName[KW_IDX_HFROM_1]);
+          tblEntry[i].hourFrom_1   = server->arg(formFieldName[KW_IDX_HFROM_1]);
       }
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*)"tblEntry[%d].hourFrom_1    = server.arg(\"%s\") ->%s\n", 
-                  i, formFieldName[KW_IDX_HFROM_1].c_str(), server.arg(formFieldName[KW_IDX_HFROM_1]).c_str());
+      Logger.Log( LOGLEVEL_DEBUG, (const char*)"tblEntry[%d].hourFrom_1    = server->arg(\"%s\") ->%s\n", 
+                  i, formFieldName[KW_IDX_HFROM_1].c_str(), server->arg(formFieldName[KW_IDX_HFROM_1]).c_str());
     }
 #endif // DO_LOG
 
-      if( isValidMinute(server.arg(formFieldName[KW_IDX_MFROM_1]).c_str()) )
+      if( isValidMinute(server->arg(formFieldName[KW_IDX_MFROM_1]).c_str()) )
       {
-          tblEntry[i].minuteFrom_1 = server.arg(formFieldName[KW_IDX_MFROM_1]);
+          tblEntry[i].minuteFrom_1 = server->arg(formFieldName[KW_IDX_MFROM_1]);
       }
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].minuteFrom_1 = server.arg(\"%s\") ->%s\n", 
-                  i, formFieldName[KW_IDX_MFROM_1].c_str(), server.arg(formFieldName[KW_IDX_MFROM_1]).c_str());
+      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].minuteFrom_1 = server->arg(\"%s\") ->%s\n", 
+                  i, formFieldName[KW_IDX_MFROM_1].c_str(), server->arg(formFieldName[KW_IDX_MFROM_1]).c_str());
     }
 #endif // DO_LOG
 
-      if( isValidHour( server.arg(formFieldName[KW_IDX_HTO_1]).c_str()) )
+      if( isValidHour( server->arg(formFieldName[KW_IDX_HTO_1]).c_str()) )
       {
-          tblEntry[i].hourTo_1     = server.arg(formFieldName[KW_IDX_HTO_1]);
+          tblEntry[i].hourTo_1     = server->arg(formFieldName[KW_IDX_HTO_1]);
       }
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*)"tblEntry[%d].hourTo_1      = server.arg(\"%s\") ->%s\n", 
-                  i, formFieldName[KW_IDX_HTO_1].c_str(), server.arg(formFieldName[KW_IDX_HTO_1]).c_str());
+      Logger.Log( LOGLEVEL_DEBUG, (const char*)"tblEntry[%d].hourTo_1      = server->arg(\"%s\") ->%s\n", 
+                  i, formFieldName[KW_IDX_HTO_1].c_str(), server->arg(formFieldName[KW_IDX_HTO_1]).c_str());
     }
 #endif // DO_LOG
 
-      if( isValidMinute( server.arg(formFieldName[KW_IDX_MTO_1]).c_str()) )
+      if( isValidMinute( server->arg(formFieldName[KW_IDX_MTO_1]).c_str()) )
       {
-          tblEntry[i].minuteTo_1   = server.arg(formFieldName[KW_IDX_MTO_1]);
+          tblEntry[i].minuteTo_1   = server->arg(formFieldName[KW_IDX_MTO_1]);
       }
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].minuteTo_1   = server.arg(\"%s\") ->%s\n", 
-                  i, formFieldName[KW_IDX_MTO_1].c_str(), server.arg(formFieldName[KW_IDX_MTO_1]).c_str());
+      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].minuteTo_1   = server->arg(\"%s\") ->%s\n", 
+                  i, formFieldName[KW_IDX_MTO_1].c_str(), server->arg(formFieldName[KW_IDX_MTO_1]).c_str());
     }
 #endif // DO_LOG
 
-      if( isValidHour( server.arg(formFieldName[KW_IDX_HFROM_2]).c_str()) )
+      if( isValidHour( server->arg(formFieldName[KW_IDX_HFROM_2]).c_str()) )
       {
-          tblEntry[i].hourFrom_2   = server.arg(formFieldName[KW_IDX_HFROM_2]);
+          tblEntry[i].hourFrom_2   = server->arg(formFieldName[KW_IDX_HFROM_2]);
       }
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].hourFrom_2   = server.arg(\"%s\") ->%s\n", 
-                  i, formFieldName[KW_IDX_HFROM_2].c_str(), server.arg(formFieldName[KW_IDX_HFROM_2]).c_str());
+      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].hourFrom_2   = server->arg(\"%s\") ->%s\n", 
+                  i, formFieldName[KW_IDX_HFROM_2].c_str(), server->arg(formFieldName[KW_IDX_HFROM_2]).c_str());
     }
 #endif // DO_LOG
 
-      if( isValidMinute( server.arg(formFieldName[KW_IDX_MFROM_2]).c_str()) )
+      if( isValidMinute( server->arg(formFieldName[KW_IDX_MFROM_2]).c_str()) )
       {
-          tblEntry[i].minuteFrom_2 = server.arg(formFieldName[KW_IDX_MFROM_2]);
+          tblEntry[i].minuteFrom_2 = server->arg(formFieldName[KW_IDX_MFROM_2]);
       }
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].minuteFrom_2 = server.arg(\"%s\") ->%s\n", 
-                  i, formFieldName[KW_IDX_MFROM_2].c_str(), server.arg(formFieldName[KW_IDX_MFROM_2]).c_str());
+      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].minuteFrom_2 = server->arg(\"%s\") ->%s\n", 
+                  i, formFieldName[KW_IDX_MFROM_2].c_str(), server->arg(formFieldName[KW_IDX_MFROM_2]).c_str());
     }
 #endif // DO_LOG
 
-      if( isValidHour( server.arg(formFieldName[KW_IDX_HTO_2]).c_str()) )
+      if( isValidHour( server->arg(formFieldName[KW_IDX_HTO_2]).c_str()) )
       {
-          tblEntry[i].hourTo_2     = server.arg(formFieldName[KW_IDX_HTO_2]);
+          tblEntry[i].hourTo_2     = server->arg(formFieldName[KW_IDX_HTO_2]);
       }
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].hourTo_2     = server.arg(\"%s\") ->%s\n", 
-                  i, formFieldName[KW_IDX_HTO_2].c_str(), server.arg(formFieldName[KW_IDX_HTO_2]).c_str());
+      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].hourTo_2     = server->arg(\"%s\") ->%s\n", 
+                  i, formFieldName[KW_IDX_HTO_2].c_str(), server->arg(formFieldName[KW_IDX_HTO_2]).c_str());
     }
 #endif // DO_LOG
 
-      if( isValidMinute( server.arg(formFieldName[KW_IDX_MTO_2]).c_str()) )
+      if( isValidMinute( server->arg(formFieldName[KW_IDX_MTO_2]).c_str()) )
       {
-          tblEntry[i].minuteTo_2   = server.arg(formFieldName[KW_IDX_MTO_2]);
+          tblEntry[i].minuteTo_2   = server->arg(formFieldName[KW_IDX_MTO_2]);
       }
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].minuteTo_2   = server.arg(\"%s\") ->%s\n", 
-                  i, formFieldName[KW_IDX_MTO_2].c_str(), server.arg(formFieldName[KW_IDX_MTO_2]).c_str());
+      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].minuteTo_2   = server->arg(\"%s\") ->%s\n", 
+                  i, formFieldName[KW_IDX_MTO_2].c_str(), server->arg(formFieldName[KW_IDX_MTO_2]).c_str());
     }
 #endif // DO_LOG
 
 
-      if( isValidHour( server.arg(formFieldName[KW_IDX_HFROM_1]).c_str()) &&
-          isValidMinute( server.arg(formFieldName[KW_IDX_MFROM_1]).c_str()) &&
-          isValidHour( server.arg(formFieldName[KW_IDX_HTO_1]).c_str()) &&
-          isValidMinute( server.arg(formFieldName[KW_IDX_MTO_1]).c_str()) )
+      if( isValidHour( server->arg(formFieldName[KW_IDX_HFROM_1]).c_str()) &&
+          isValidMinute( server->arg(formFieldName[KW_IDX_MFROM_1]).c_str()) &&
+          isValidHour( server->arg(formFieldName[KW_IDX_HTO_1]).c_str()) &&
+          isValidMinute( server->arg(formFieldName[KW_IDX_MTO_1]).c_str()) )
       {
           tblEntry[i].enabled_1   = 
-                      server.arg(formFieldName[KW_IDX_ENABLED_1]).equalsIgnoreCase("aktiv") ? true : false;
+                      server->arg(formFieldName[KW_IDX_ENABLED_1]).equalsIgnoreCase("aktiv") ? true : false;
 
 #ifdef DO_LOG
         if ( !beQuiet )
         {
-          Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].enabled_1   = server.arg(\"%s\") -> %d\n", 
+          Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].enabled_1   = server->arg(\"%s\") -> %d\n", 
                       i, formFieldName[KW_IDX_ENABLED_1].c_str(), tblEntry[i].enabled_1);
         }
 #endif // DO_LOG
@@ -3134,29 +3134,29 @@ void setupPage()
 #endif // DO_LOG
       }
       
-      tblEntry[i].extEnable_1 = server.arg(formFieldName[KW_IDX_EXT_1]).equalsIgnoreCase("aktiv") ? true : false;
+      tblEntry[i].extEnable_1 = server->arg(formFieldName[KW_IDX_EXT_1]).equalsIgnoreCase("aktiv") ? true : false;
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].extEnable_1 = server.arg(\"%s\") -> %d\n", 
+      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].extEnable_1 = server->arg(\"%s\") -> %d\n", 
                   i, formFieldName[KW_IDX_EXT_1].c_str(), tblEntry[i].extEnable_1);
     }
 #endif // DO_LOG
             
 
-      if( isValidHour( server.arg(formFieldName[KW_IDX_HFROM_2]).c_str()) &&
-          isValidMinute( server.arg(formFieldName[KW_IDX_MFROM_2]).c_str()) &&
-          isValidHour( server.arg(formFieldName[KW_IDX_HTO_2]).c_str()) &&
-          isValidMinute( server.arg(formFieldName[KW_IDX_MTO_2]).c_str()) )
+      if( isValidHour( server->arg(formFieldName[KW_IDX_HFROM_2]).c_str()) &&
+          isValidMinute( server->arg(formFieldName[KW_IDX_MFROM_2]).c_str()) &&
+          isValidHour( server->arg(formFieldName[KW_IDX_HTO_2]).c_str()) &&
+          isValidMinute( server->arg(formFieldName[KW_IDX_MTO_2]).c_str()) )
       {
           tblEntry[i].enabled_2   = 
-                    server.arg(formFieldName[KW_IDX_ENABLED_2]).equalsIgnoreCase("aktiv") ? true : false;
+                    server->arg(formFieldName[KW_IDX_ENABLED_2]).equalsIgnoreCase("aktiv") ? true : false;
 
 #ifdef DO_LOG
         if ( !beQuiet )
         {
-          Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].enabled_2   = server.arg(\"%s\") -> %d\n", 
+          Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].enabled_2   = server->arg(\"%s\") -> %d\n", 
                       i, formFieldName[KW_IDX_ENABLED_2].c_str(), tblEntry[i].enabled_2);
         }
 #endif // DO_LOG
@@ -3166,12 +3166,12 @@ void setupPage()
           Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].enabled_2   = FALSE - error in time spec\n", i);
       }
       
-      tblEntry[i].extEnable_2 = server.arg(formFieldName[KW_IDX_EXT_2]).equalsIgnoreCase("aktiv") ? true : false;
+      tblEntry[i].extEnable_2 = server->arg(formFieldName[KW_IDX_EXT_2]).equalsIgnoreCase("aktiv") ? true : false;
 
 #ifdef DO_LOG
     if ( !beQuiet )
     {
-      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].extEnable_2 = server.arg(\"%s\") -> %d\n", 
+      Logger.Log( LOGLEVEL_DEBUG, (const char*) "tblEntry[%d].extEnable_2 = server->arg(\"%s\") -> %d\n", 
                   i, formFieldName[KW_IDX_EXT_2].c_str(), tblEntry[i].extEnable_2);
     }
 #endif // DO_LOG
@@ -3261,7 +3261,7 @@ void setupPage()
   pageContent += "</body>";
   pageContent += "</html>";
 
-  server.send(200, "text/html", pageContent);
+  server->send(200, "text/html", pageContent);
 
   //  Serial.print(pageContent.c_str());
 
@@ -4035,11 +4035,11 @@ void processApiCall( int keyword, const char* arg )
                 }
                 break;
             case API_KEYWORD_MODE:
-                if( server.arg( _apiKeywords[API_KEYWORD_PORT] ).length() )
+                if( server->arg( _apiKeywords[API_KEYWORD_PORT] ).length() )
                 {
-                    int port = server.arg( _apiKeywords[API_KEYWORD_PORT] ).toInt() - 1;
+                    int port = server->arg( _apiKeywords[API_KEYWORD_PORT] ).toInt() - 1;
                     
-                    if(server.arg( _apiKeywords[API_KEYWORD_MODE] ).equalsIgnoreCase(API_VALUE_AUTO))
+                    if(server->arg( _apiKeywords[API_KEYWORD_MODE] ).equalsIgnoreCase(API_VALUE_AUTO))
                     {
                         tblEntry[port].mode = API_VALUE_AUTO;
                         retVal = E_SUCCESS;
@@ -4047,7 +4047,7 @@ void processApiCall( int keyword, const char* arg )
                     }
                     else
                     {
-                        if(server.arg( _apiKeywords[API_KEYWORD_MODE] ).equalsIgnoreCase(API_VALUE_OFF))
+                        if(server->arg( _apiKeywords[API_KEYWORD_MODE] ).equalsIgnoreCase(API_VALUE_OFF))
                         {
                             tblEntry[port].mode = API_VALUE_OFF;
                             retVal = E_SUCCESS;
@@ -4055,7 +4055,7 @@ void processApiCall( int keyword, const char* arg )
                         }
                         else
                         {
-                            if(server.arg( _apiKeywords[API_KEYWORD_MODE] ).equalsIgnoreCase(API_VALUE_ON))
+                            if(server->arg( _apiKeywords[API_KEYWORD_MODE] ).equalsIgnoreCase(API_VALUE_ON))
                             {
                                 tblEntry[port].mode = API_VALUE_ON;
                                 retVal = E_SUCCESS;
@@ -4063,7 +4063,7 @@ void processApiCall( int keyword, const char* arg )
                             }
                             else
                             {
-                                if(server.arg( _apiKeywords[API_KEYWORD_MODE] ).length() )
+                                if(server->arg( _apiKeywords[API_KEYWORD_MODE] ).length() )
                                 {
                                     postResult( API_RESULT_INVALID_MODE, true );
                                 }
@@ -4084,16 +4084,16 @@ void processApiCall( int keyword, const char* arg )
             case API_KEYWORD_TO1:
             case API_KEYWORD_FROM2:
             case API_KEYWORD_TO2:
-                if( server.arg( _apiKeywords[API_KEYWORD_PORT] ).length() )
+                if( server->arg( _apiKeywords[API_KEYWORD_PORT] ).length() )
                 {
-                    int port = server.arg( _apiKeywords[API_KEYWORD_PORT] ).toInt() - 1;
+                    int port = server->arg( _apiKeywords[API_KEYWORD_PORT] ).toInt() - 1;
                     
                     if( strlen(arg) > 0 )
                     {  
                         switch(keyword)
                         {
                             case API_KEYWORD_FROM1:
-                                if( server.arg( _apiKeywords[API_KEYWORD_FROM1] ))
+                                if( server->arg( _apiKeywords[API_KEYWORD_FROM1] ))
                                 {
                                     retVal = sscanf(arg, "%2s:%2s",hourScan, minScan);
                                     if( isValidHour(hourScan) && isValidMinute(minScan) )
@@ -4112,7 +4112,7 @@ void processApiCall( int keyword, const char* arg )
                                 }
                                 break;
                             case API_KEYWORD_TO1:
-                                if( server.arg( _apiKeywords[API_KEYWORD_TO1] ))
+                                if( server->arg( _apiKeywords[API_KEYWORD_TO1] ))
                                 {
                                     retVal = sscanf(arg, "%2s:%2s",hourScan, minScan);
                                     if( isValidHour(hourScan) && isValidMinute(minScan) )
@@ -4131,7 +4131,7 @@ void processApiCall( int keyword, const char* arg )
                                 }
                                 break;                                
                             case API_KEYWORD_FROM2:
-                                if( server.arg( _apiKeywords[API_KEYWORD_FROM2] ))
+                                if( server->arg( _apiKeywords[API_KEYWORD_FROM2] ))
                                 {
                                     retVal = sscanf(arg, "%2s:%2s",hourScan, minScan);
                                     if( isValidHour(hourScan) && isValidMinute(minScan) )
@@ -4150,7 +4150,7 @@ void processApiCall( int keyword, const char* arg )
                                 }
                                 break;
                             case API_KEYWORD_TO2:
-                                if( server.arg( _apiKeywords[API_KEYWORD_TO2] ))
+                                if( server->arg( _apiKeywords[API_KEYWORD_TO2] ))
                                 {
                                     retVal = sscanf(arg, "%2s:%2s",hourScan, minScan);
                                     if( isValidHour(hourScan) && isValidMinute(minScan) )
@@ -4196,13 +4196,13 @@ void processApiCall( int keyword, const char* arg )
                 break;
             case API_KEYWORD_TIME1:
             case API_KEYWORD_TIME2:
-                if( server.arg( _apiKeywords[API_KEYWORD_PORT] ).length() )
+                if( server->arg( _apiKeywords[API_KEYWORD_PORT] ).length() )
                 {    
-                    int port = server.arg( _apiKeywords[API_KEYWORD_PORT] ).toInt() - 1;
+                    int port = server->arg( _apiKeywords[API_KEYWORD_PORT] ).toInt() - 1;
 
                     if(keyword == API_KEYWORD_TIME1)
                     {
-                        if(server.arg( _apiKeywords[API_KEYWORD_TIME1] ).equalsIgnoreCase(API_VALUE_ENABLE))
+                        if(server->arg( _apiKeywords[API_KEYWORD_TIME1] ).equalsIgnoreCase(API_VALUE_ENABLE))
                         {
                             tblEntry[port].enabled_1 = true;
                             retVal = E_SUCCESS;
@@ -4210,7 +4210,7 @@ void processApiCall( int keyword, const char* arg )
                         }
                         else
                         {
-                            if(server.arg( _apiKeywords[API_KEYWORD_TIME1] ).equalsIgnoreCase(API_VALUE_DISABLE))
+                            if(server->arg( _apiKeywords[API_KEYWORD_TIME1] ).equalsIgnoreCase(API_VALUE_DISABLE))
                             {
                                 tblEntry[port].enabled_1 = false;
                                 retVal = E_SUCCESS;
@@ -4218,7 +4218,7 @@ void processApiCall( int keyword, const char* arg )
                             }
                             else
                             {
-                                if(server.arg(_apiKeywords[API_KEYWORD_TIME1]).length())
+                                if(server->arg(_apiKeywords[API_KEYWORD_TIME1]).length())
                                 {
                                     postResult( API_RESULT_INVALID_MODE_TIME1, true );
                                 }
@@ -4233,7 +4233,7 @@ void processApiCall( int keyword, const char* arg )
                     {
                         if(keyword == API_KEYWORD_TIME2)
                         {
-                            if(server.arg( _apiKeywords[API_KEYWORD_TIME2] ).equalsIgnoreCase(API_VALUE_ENABLE))
+                            if(server->arg( _apiKeywords[API_KEYWORD_TIME2] ).equalsIgnoreCase(API_VALUE_ENABLE))
                             {
                                 tblEntry[port].enabled_2 = true;
                                 retVal = E_SUCCESS;
@@ -4242,7 +4242,7 @@ void processApiCall( int keyword, const char* arg )
                             else
                             {
 
-                                if(server.arg( _apiKeywords[API_KEYWORD_TIME2] ).equalsIgnoreCase(API_VALUE_DISABLE))
+                                if(server->arg( _apiKeywords[API_KEYWORD_TIME2] ).equalsIgnoreCase(API_VALUE_DISABLE))
                                 {
                                     tblEntry[port].enabled_2 = false;
                                     retVal = E_SUCCESS;
@@ -4250,7 +4250,7 @@ void processApiCall( int keyword, const char* arg )
                                 }
                                 else
                                 {
-                                    if(server.arg(_apiKeywords[API_KEYWORD_TIME2]).length())
+                                    if(server->arg(_apiKeywords[API_KEYWORD_TIME2]).length())
                                     {
                                         postResult( API_RESULT_INVALID_MODE_TIME2, true );
                                     }
@@ -4270,11 +4270,11 @@ void processApiCall( int keyword, const char* arg )
                 }
                 break;
             case API_KEYWORD_EXT1:
-                if( server.arg( _apiKeywords[API_KEYWORD_PORT] ).length() )
+                if( server->arg( _apiKeywords[API_KEYWORD_PORT] ).length() )
                 {
-                    int port = server.arg( _apiKeywords[API_KEYWORD_PORT] ).toInt() - 1;
+                    int port = server->arg( _apiKeywords[API_KEYWORD_PORT] ).toInt() - 1;
                   
-                    if(server.arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_ENABLE))
+                    if(server->arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_ENABLE))
                     {
 
                         tblEntry[port].extEnable_1 = true;
@@ -4283,7 +4283,7 @@ void processApiCall( int keyword, const char* arg )
                     }
                     else
                     {
-                        if(server.arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_DISABLE))
+                        if(server->arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_DISABLE))
                         {
 
                             tblEntry[port].extEnable_1 = false;
@@ -4292,7 +4292,7 @@ void processApiCall( int keyword, const char* arg )
                         }
                         else
                         { 
-                            if(server.arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_ON))
+                            if(server->arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_ON))
                             {
 // trigger ext1                       tblEntry[port]
                                 startExt1Mode();
@@ -4301,7 +4301,7 @@ void processApiCall( int keyword, const char* arg )
                             }
                             else
                             {
-                                if(server.arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_OFF))
+                                if(server->arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_OFF))
                                 {                              
 // trigger ext1                       tblEntry[port]
 
@@ -4311,7 +4311,7 @@ void processApiCall( int keyword, const char* arg )
                                 }
                                 else
                                 {                          
-                                    if(server.arg( _apiKeywords[API_KEYWORD_EXT1] ).length() )
+                                    if(server->arg( _apiKeywords[API_KEYWORD_EXT1] ).length() )
                                     {
                                         postResult( API_RESULT_INVALID_MODE_EXT1, true );
                                     }
@@ -4326,7 +4326,7 @@ void processApiCall( int keyword, const char* arg )
                 }
                 else
                 {
-                    if(server.arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_ON))
+                    if(server->arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_ON))
                     {
                         startExt1Mode();
                         retVal = E_SUCCESS;
@@ -4334,7 +4334,7 @@ void processApiCall( int keyword, const char* arg )
                      }
                      else
                      {
-                        if(server.arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_OFF))
+                        if(server->arg( _apiKeywords[API_KEYWORD_EXT1] ).equalsIgnoreCase(API_VALUE_OFF))
                         {                              
                             stopExt1Mode();
                             retVal = E_SUCCESS;
@@ -4348,11 +4348,11 @@ void processApiCall( int keyword, const char* arg )
                 }
                 break;   
             case API_KEYWORD_EXT2:
-                if( server.arg( _apiKeywords[API_KEYWORD_PORT] ).length() )
+                if( server->arg( _apiKeywords[API_KEYWORD_PORT] ).length() )
                 {
-                    int port = server.arg( _apiKeywords[API_KEYWORD_PORT] ).toInt() - 1;
+                    int port = server->arg( _apiKeywords[API_KEYWORD_PORT] ).toInt() - 1;
                   
-                    if(server.arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_ENABLE))
+                    if(server->arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_ENABLE))
                     {
 
                         tblEntry[port].extEnable_2 = true;
@@ -4362,7 +4362,7 @@ void processApiCall( int keyword, const char* arg )
                     }
                     else
                     {
-                        if(server.arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_DISABLE))
+                        if(server->arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_DISABLE))
                         {
 
                             tblEntry[port].extEnable_2 = false;
@@ -4372,7 +4372,7 @@ void processApiCall( int keyword, const char* arg )
                         }
                         else
                         {
-                            if(server.arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_ON))
+                            if(server->arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_ON))
                             {
 // trigger ext1                       tblEntry[port]
 
@@ -4382,7 +4382,7 @@ void processApiCall( int keyword, const char* arg )
                             }
                             else
                             {
-                                if(server.arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_OFF))
+                                if(server->arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_OFF))
                                 {                              
 // trigger ext1                       tblEntry[port]
 
@@ -4392,7 +4392,7 @@ void processApiCall( int keyword, const char* arg )
                                 }
                                 else
                                 {      
-                                    if(server.arg( _apiKeywords[API_KEYWORD_EXT2] ).length() )
+                                    if(server->arg( _apiKeywords[API_KEYWORD_EXT2] ).length() )
                                     {
                                         postResult( API_RESULT_INVALID_MODE_EXT2, true );
                                     }
@@ -4407,7 +4407,7 @@ void processApiCall( int keyword, const char* arg )
                 }
                 else
                 {
-                    if(server.arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_ON))
+                    if(server->arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_ON))
                     {
 // trigger ext1                       tblEntry[port]
 
@@ -4417,7 +4417,7 @@ void processApiCall( int keyword, const char* arg )
                      }
                      else
                      {
-                         if(server.arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_OFF))
+                         if(server->arg( _apiKeywords[API_KEYWORD_EXT2] ).equalsIgnoreCase(API_VALUE_OFF))
                          {                              
 // trigger ext1                       tblEntry[port]
 
@@ -4470,7 +4470,7 @@ void apiPage()
 
   pageContent += String("apiPage<br>");
 
-  if ( server.method() == SERVER_METHOD_POST )
+  if ( server->method() == SERVER_METHOD_POST )
   {
     LEDRed();
 #ifdef DO_LOG
@@ -4505,18 +4505,18 @@ void apiPage()
 #ifdef DO_LOG
       if ( !beQuiet )
       {
-        pageContent += "server.argName[" + String(i) + "] = " + server.argName(i);
-        pageContent += " -> server.hasArg[" + String(_apiKeywords[i]) + "] = " + server.hasArg( _apiKeywords[i] );
-        pageContent += " -> server.arg("    + String(_apiKeywords[i]) + ") = " + server.arg( _apiKeywords[i] );
+        pageContent += "server->argName[" + String(i) + "] = " + server->argName(i);
+        pageContent += " -> server->hasArg[" + String(_apiKeywords[i]) + "] = " + server->hasArg( _apiKeywords[i] );
+        pageContent += " -> server->arg("    + String(_apiKeywords[i]) + ") = " + server->arg( _apiKeywords[i] );
         pageContent += "<br>";
       }
 #endif // DO_LOG
 
-      if( server.hasArg( _apiKeywords[i] ) )
+      if( server->hasArg( _apiKeywords[i] ) )
       {
-        if( server.arg( _apiKeywords[i] ) )
+        if( server->arg( _apiKeywords[i] ) )
         {
-          processApiCall( i, server.arg(_apiKeywords[i]).c_str()) ;
+          processApiCall( i, server->arg(_apiKeywords[i]).c_str()) ;
           // this seems always been called
         }
         else
@@ -4529,7 +4529,7 @@ void apiPage()
     pageContent += "</body>";
     pageContent += "</html>";
 
-    server.send(200, "text/html", pageContent);
+    server->send(200, "text/html", pageContent);
   }
 }
 
